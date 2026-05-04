@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerified() && request.auth.token.email == "luthermondey53@gmail.com";
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-@.]+$');
+    }
+
+    // Validation for Contact
+    function isValidContact(data) {
+      return data.keys().hasAll(['jid', 'phoneNumber', 'lastBroadcastAt', 'source', 'description'])
+          && data.keys().size() == 5
+          && data.jid is string && data.jid.size() <= 100
+          && data.phoneNumber is string && data.phoneNumber.size() <= 20
+          && data.lastBroadcastAt is timestamp
+          && data.source == 'broadcast'
+          && data.description is string && data.description.size() <= 500;
+    }
+
+    // Validation for Notification
+    function isValidNotification(data) {
+      return data.keys().hasAll(['type', 'timestamp', 'summary', 'status'])
+          && data.keys().size() == 4
+          && data.type == 'broadcast_complete'
+          && data.timestamp is timestamp
+          && data.summary is string && data.summary.size() <= 1000
+          && data.status in ['success', 'partial_failure'];
+    }
+
+    // 3. Health Check (for server tests)
+    match /health_check/{docId} {
+      allow read, write: if true; // Simple test doc
+    }
+
+    // 1. Contacts Collection
+    match /contacts/{jid} {
+      allow get: if isAdmin() && isValidId(jid);
+      allow list: if isAdmin();
+      allow create, update: if (request.auth == null || isAdmin()) && isValidContact(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 2. Notifications Collection
+    match /notifications/{notifId} {
+      allow read: if isAdmin();
+      allow create: if (request.auth == null || isAdmin()) && isValidNotification(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+  }
+}

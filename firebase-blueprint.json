@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "Contact": {
+      "title": "WhatsApp Contact",
+      "description": "A contact extracted from a WhatsApp group during a broadcast campaign.",
+      "type": "object",
+      "properties": {
+        "jid": { "type": "string", "description": "WhatsApp ID" },
+        "phoneNumber": { "type": "string", "description": "Phone number without domain" },
+        "lastBroadcastAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last broadcast" },
+        "source": { "type": "string", "enum": ["broadcast"], "description": "Origin of the contact" },
+        "description": { "type": "string", "description": "Success message or context" }
+      },
+      "required": ["jid", "phoneNumber", "lastBroadcastAt", "source", "description"]
+    },
+    "Notification": {
+      "title": "System Notification",
+      "description": "Alerts for the administrator about broadcast status.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["broadcast_complete"], "description": "Type of event" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "summary": { "type": "string", "description": "Summary of the broadcast results" },
+        "status": { "type": "string", "enum": ["success", "partial_failure"] }
+      },
+      "required": ["type", "timestamp", "summary", "status"]
+    }
+  },
+  "firestore": {
+    "/contacts/{jid}": {
+      "schema": "Contact",
+      "description": "Storage for extracted contacts"
+    },
+    "/notifications/{notifId}": {
+      "schema": "Notification",
+      "description": "System alerts for the admin"
+    }
+  }
+}

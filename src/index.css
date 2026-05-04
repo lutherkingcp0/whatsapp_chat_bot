@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand: #00a884; /* Bento Brand Green */
+  --color-brand-dark: #008f72;
+  --color-bg-base: #f0f2f5;
+  --color-text-base: #111b21;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-base text-text-base font-sans antialiased;
+  }
+}
+
+@layer components {
+  .bento-card {
+    @apply bg-white border border-gray-200 rounded-2xl p-5 shadow-sm overflow-hidden flex flex-col;
+  }
+  
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-dark text-white font-bold py-3 rounded-xl shadow-lg shadow-green-100 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .input-field {
+    @apply bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all text-sm;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full;
+  }
+}
